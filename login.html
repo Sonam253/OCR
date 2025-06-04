@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block extra_head %}
+<script>
+function togglePassword(id, iconId) {
+  var input = document.getElementById(id);
+  var icon = document.getElementById(iconId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.classList.remove('fa-eye');
+    icon.classList.add('fa-eye-slash');
+  } else {
+    input.type = 'password';
+    icon.classList.remove('fa-eye-slash');
+    icon.classList.add('fa-eye');
+  }
+}
+</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height:80vh;">
+  <div class="card shadow-lg p-4" style="max-width: 400px; width:100%; border-radius: 20px;">
+    <div class="text-center mb-4">
+      <img src="https://img.icons8.com/ios-filled/64/6366f1/lock-2.png" alt="Login Icon" style="opacity:0.8;">
+      <h3 class="mt-2 mb-0">Sign In</h3>
+      <div class="text-muted small">AI-Powered OCR Document Verification</div>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <form method="POST">
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" class="form-control" id="username" name="username" required autofocus>
+      </div>
+      <div class="mb-3 position-relative">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" name="password" required>
+        <button type="button" class="btn btn-sm btn-light position-absolute top-50 end-0 translate-middle-y me-2" style="z-index:2;" onclick="togglePassword('password','eye1')"><i id="eye1" class="fa fa-eye"></i></button>
+      </div>
+      <div class="d-grid">
+        <button type="submit" class="btn btn-primary btn-lg">Login</button>
+      </div>
+    </form>
+    <div class="text-center mt-3">
+      <span class="small">Don't have an account? <a href="{{ url_for('signup') }}" class="text-primary">Sign up</a></span>
+    </div>
+    <div class="text-center mt-2">
+      <span class="small"><a href="{{ url_for('forgot') }}" class="text-primary">Forgot password?</a></span>
+    </div>
+  </div>
+</div>
+{% endblock %} 

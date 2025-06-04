@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+<style>
+.profile-container { display: flex; gap: 2rem; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
+.profile-card { background: #fff; border-radius: 18px; box-shadow: 0 4px 24px rgba(0,0,0,0.07); padding: 2rem 1.5rem; min-width: 320px; max-width: 340px; text-align: center; }
+.profile-avatar { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 3px solid #e0e7ff; margin-bottom: 1rem; }
+.edit-btn { margin-top: 1.5rem; }
+/* Off-canvas panel */
+.edit-panel-bg { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.25); z-index: 1040; }
+.edit-panel { position: fixed; top: 0; right: -500px; width: 420px; max-width: 100vw; height: 100vh; background: #f8fafc; box-shadow: -2px 0 16px rgba(0,0,0,0.08); z-index: 1050; transition: right 0.3s; overflow-y: auto; }
+.edit-panel.open { right: 0; }
+.edit-panel-bg.open { display: block; }
+.edit-panel .close { position: absolute; top: 18px; right: 18px; font-size: 1.5rem; cursor: pointer; }
+.edit-tabs { display: flex; border-bottom: 2px solid #e0e7ff; margin-bottom: 1.5rem; }
+.edit-tab { padding: 0.7rem 1.5rem; cursor: pointer; font-weight: 500; border: none; background: none; outline: none; color: #888; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; }
+.edit-tab.active { color: #2563eb; border-bottom: 2px solid #2563eb; }
+@media (max-width: 900px) { .profile-container { flex-direction: column; align-items: center; } .edit-panel { width: 100vw; } }
+.edit-panel label.form-label { text-align: center; display: block; width: 100%; }
+.edit-panel .form-control { text-align: center; }
+</style>
+<script>
+function openEditPanel() {
+  document.getElementById('editPanel').classList.add('open');
+  document.getElementById('editPanelBg').classList.add('open');
+}
+function closeEditPanel() {
+  document.getElementById('editPanel').classList.remove('open');
+  document.getElementById('editPanelBg').classList.remove('open');
+}
+function switchTab(tab) {
+  document.getElementById('tab-userinfo').style.display = tab === 'userinfo' ? 'block' : 'none';
+  document.getElementById('tab-history').style.display = tab === 'history' ? 'block' : 'none';
+  document.getElementById('tab-btn-userinfo').classList.toggle('active', tab === 'userinfo');
+  document.getElementById('tab-btn-history').classList.toggle('active', tab === 'history');
+}
+document.addEventListener('DOMContentLoaded', function() {
+  switchTab('userinfo');
+  setInterval(pollHistory, 10000);
+});
+function pollHistory() {
+  fetch('/api/user_history')
+    .then(r => r.json())
+    .then(data => {
+      if (Array.isArray(data)) renderHistory(data);
+    });
+}
+function renderHistory(history) {
+  const container = document.getElementById('history-list');
+  if (!container) return;
+  container.innerHTML = '';
+  if (history.length === 0) {
+    container.innerHTML = '<div class="list-group-item text-center text-muted py-3"><em>No uploads yet.</em></div>';
+    return;
+  }
+  for (const item of history) {
+    const badge = item.status === 'Verified' ? 'bg-success' : 'bg-danger';
+    const html = `<div class="list-group-item d-flex align-items-center gap-3 py-2">
+      <img src="https://img.icons8.com/ios-filled/32/6366f1/document--v2.png" alt="Doc" style="opacity:0.7;">
+      <div class="flex-grow-1">
+        <div class="fw-semibold small">${item.filename}</div>
+        <div class="small text-muted">${item.timestamp.replace('T',' ').slice(0,19)}</div>
+      </div>
+      <span class="badge ${badge}">${item.status}</span>
+      <a class="btn btn-sm btn-outline-secondary" href="/static/uploads/${item.filename}" download><i class="fa fa-download"></i></a>
+    </div>`;
+    container.innerHTML += html;
+  }
+}
+</script>
+{% endblock %}
+{% block content %}
+<div class="profile-container">
+  <!-- Left: Profile Card -->
+  <div class="profile-card">
+    <img src="https://img.icons8.com/color/96/000000/ocr.png" alt="Avatar" class="profile-avatar" id="avatarPreview">
+    <h4 class="fw-bold mb-1">{{ user.full_name if user.full_name else username }}</h4>
+    <div class="text-muted mb-2">@{{ username }}</div>
+    <div class="mb-2"><i class="fa fa-envelope me-1"></i> {{ user.email }}</div>
+    <div class="mb-2"><i class="fa fa-calendar me-1"></i> Member since: <span class="fw-semibold">{{ user.member_since if user.member_since else 'N/A' }}</span></div>
+    <button class="btn btn-primary edit-btn w-100" onclick="openEditPanel()"><i class="fa fa-edit me-2"></i>Edit Profile</button>
+  </div>
+  <!-- Right: Off-canvas Edit Panel -->
+  <div id="editPanelBg" class="edit-panel-bg" onclick="closeEditPanel()"></div>
+  <div id="editPanel" class="edit-panel">
+    <span class="close" onclick="closeEditPanel()">&times;</span>
+    <h3 class="fw-bold mb-3 mt-3 ms-2">Edit Profile</h3>
+    <div class="edit-tabs mb-4">
+      <button id="tab-btn-userinfo" class="edit-tab active" onclick="switchTab('userinfo')">User info</button>
+      <button id="tab-btn-history" class="edit-tab" onclick="switchTab('history')">History</button>
+    </div>
+    <!-- User Info Tab -->
+    <div id="tab-userinfo">
+      <form method="POST" enctype="multipart/form-data">
+        <div class="mb-3 text-center">
+          <label for="avatar" class="form-label">Profile Photo</label><br>
+          <input type="file" id="avatar" name="avatar" accept="image/*" class="form-control" style="max-width:220px; margin:auto;">
+        </div>
+        <div class="mb-3">
+          <label for="full_name" class="form-label">Full Name</label>
+          <input type="text" class="form-control" id="full_name" name="full_name" value="{{ user.full_name if user.full_name else '' }}">
+        </div>
+        <div class="mb-3">
+          <label for="username" class="form-label">Username</label>
+          <input type="text" class="form-control" id="username" name="username" value="{{ username }}" readonly>
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+        </div>
+        <div class="mb-3">
+          <label for="facebook" class="form-label"><i class="fab fa-facebook me-1"></i> Facebook Username</label>
+          <input type="text" class="form-control" id="facebook" name="facebook" value="{{ user.facebook if user.facebook else '' }}">
+        </div>
+        <div class="mb-3">
+          <label for="twitter" class="form-label"><i class="fab fa-twitter me-1"></i> Twitter Username</label>
+          <input type="text" class="form-control" id="twitter" name="twitter" value="{{ user.twitter if user.twitter else '' }}">
+        </div>
+        <div class="d-grid">
+          <button type="submit" class="btn btn-success btn-lg">Update info</button>
+        </div>
+      </form>
+    </div>
+    <!-- History Tab -->
+    <div id="tab-history" style="display:none;">
+      <div id="history-list" class="list-group list-group-flush">
+        {% if history and history|length > 0 %}
+          {% for item in history %}
+          <div class="list-group-item d-flex align-items-center gap-3 py-2">
+            <img src="https://img.icons8.com/ios-filled/32/6366f1/document--v2.png" alt="Doc" style="opacity:0.7;">
+            <div class="flex-grow-1">
+              <div class="fw-semibold small">{{ item.filename }}</div>
+              <div class="small text-muted">{{ item.timestamp|replace('T', ' ')|slice(0,19) }}</div>
+            </div>
+            <span class="badge {% if item.status == 'Verified' %}bg-success{% else %}bg-danger{% endif %}">{{ item.status }}</span>
+            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('static', filename='uploads/' ~ item.filename) }}" download><i class="fa fa-download"></i></a>
+          </div>
+          {% endfor %}
+        {% else %}
+        <div class="list-group-item text-center text-muted py-3">
+          <em>No uploads yet.</em>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 

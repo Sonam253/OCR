@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4 text-center">Upload History</h2>
+<div class="row justify-content-center">
+  <div class="col-md-10">
+    <div class="card shadow border-0 p-4" style="border-radius: 20px;">
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <img src="https://img.icons8.com/ios-filled/32/6366f1/time-machine.png" alt="History Icon">
+        <h5 class="mb-0">Recent Uploads</h5>
+      </div>
+      <div class="list-group list-group-flush">
+        {% if history and history|length > 0 %}
+          {% for item in history %}
+          <div class="list-group-item d-flex align-items-center gap-3 py-3">
+            <img src="https://img.icons8.com/ios-filled/40/6366f1/document--v2.png" alt="Doc" style="opacity:0.7;">
+            <div class="flex-grow-1">
+              <div class="fw-semibold">{{ item.filename }}</div>
+              <div class="small text-muted">Uploaded: {{ item.timestamp|replace('T', ' ')|slice(0,19) }}</div>
+            </div>
+            <span class="badge {% if item.status == 'Verified' %}bg-success{% else %}bg-danger{% endif %}">{{ item.status }}</span>
+            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('static', filename='uploads/' ~ item.filename) }}" download>Download</a>
+          </div>
+          {% endfor %}
+        {% else %}
+        <div class="list-group-item text-center text-muted py-4">
+          <em>No uploads yet. Your document history will appear here.</em>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 

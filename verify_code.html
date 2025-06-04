@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height:80vh;">
+  <div class="card shadow-lg p-4" style="max-width: 400px; width:100%; border-radius: 20px;">
+    <div class="text-center mb-4">
+      <img src="https://img.icons8.com/ios-filled/64/6366f1/forgot-password.png" alt="Verify Icon" style="opacity:0.8;">
+      <h3 class="mt-2 mb-0">Verify Code</h3>
+      <div class="text-muted small">Enter the code sent to your email and set a new password</div>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <form method="POST">
+      <input type="hidden" name="email" value="{{ email }}">
+      <div class="mb-3">
+        <label for="code" class="form-label">Verification Code</label>
+        <input type="text" class="form-control" id="code" name="code" required autofocus>
+      </div>
+      <div class="mb-3 position-relative">
+        <label for="new_password" class="form-label">New Password</label>
+        <input type="password" class="form-control" id="new_password" name="new_password" required>
+        <div class="form-text">Password must be at least 6 characters.</div>
+      </div>
+      <div class="mb-3 position-relative">
+        <label for="confirm_new_password" class="form-label">Confirm New Password</label>
+        <input type="password" class="form-control" id="confirm_new_password" name="confirm_new_password" required>
+      </div>
+      <div class="d-grid">
+        <button type="submit" class="btn btn-success btn-lg">Reset Password</button>
+      </div>
+    </form>
+    <div class="text-center mt-3">
+      <span class="small">Back to <a href="{{ url_for('login') }}" class="text-primary">Sign in</a></span>
+    </div>
+  </div>
+</div>
+{% endblock %} 

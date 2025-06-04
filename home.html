@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height:70vh;">
+  <div class="hero-card w-100 text-center">
+    <img src="https://img.icons8.com/ios-filled/96/6366f1/document--v2.png" alt="Document Icon" class="mb-3" style="opacity:0.85;">
+    <h1 class="display-5 fw-bold mb-3" style="letter-spacing:-1px;">AI-Powered OCR Document Verification</h1>
+    <p class="lead mb-4">Upload your documents and let AI verify them instantly.</p>
+    <a href="{{ url_for('upload') }}" class="btn btn-primary btn-lg px-5 py-2" style="font-size:1.25rem;">Get Started</a>
+  </div>
+</div>
+{% endblock %} 

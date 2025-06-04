@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block extra_head %}
+<script>
+function handleDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('file').files = e.dataTransfer.files;
+    document.getElementById('fileName').textContent = e.dataTransfer.files[0].name;
+    document.getElementById('dropArea').classList.remove('dragover');
+}
+function handleDragOver(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('dropArea').classList.add('dragover');
+}
+function handleDragLeave(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('dropArea').classList.remove('dragover');
+}
+function handleFileChange(e) {
+    if (e.target.files.length > 0) {
+        document.getElementById('fileName').textContent = e.target.files[0].name;
+    }
+}
+document.addEventListener('DOMContentLoaded', function() {
+    var dropArea = document.getElementById('dropArea');
+    if (dropArea) {
+        dropArea.addEventListener('drop', handleDrop);
+        dropArea.addEventListener('dragover', handleDragOver);
+        dropArea.addEventListener('dragleave', handleDragLeave);
+    }
+    var fileInput = document.getElementById('file');
+    if (fileInput) {
+        fileInput.addEventListener('change', handleFileChange);
+    }
+});
+</script>
+{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card shadow-lg border-0 p-4" style="border-radius: 20px;">
+      <h2 class="mb-3 text-center">Upload Document</h2>
+      <form method="POST" enctype="multipart/form-data">
+        <div id="dropArea" class="upload-drop-area mb-3">
+          <img src="https://img.icons8.com/ios-filled/48/6366f1/upload-to-cloud.png" alt="Upload Icon" class="mb-2" style="opacity:0.8;">
+          <div>Drag & drop your document here, or <label for="file" class="text-primary" style="cursor:pointer; text-decoration:underline;">browse</label></div>
+          <div class="small text-muted">(PDF, JPG, PNG)</div>
+        </div>
+        <input class="form-control d-none" type="file" id="file" name="file" required>
+        <div class="mb-3 text-center">
+          <span id="fileName" class="text-success fw-semibold"></span>
+        </div>
+        <div class="d-grid">
+          <button type="submit" class="btn btn-success btn-lg">Upload</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %} 
